@@ -1,7 +1,9 @@
 # Bitácora — EcoTrack AI (Proyecto Integrador Capstone: Vibe Coding)
 
 **Autor:** María Belén Quintero.
+
 **Proyecto:** MVP de cálculo de huella de carbono para pequeños negocios
+
 **Herramientas usadas:** Cursor
 
 ---
@@ -65,7 +67,14 @@ Entrega el código completo en un solo archivo HTML autocontenido (HTML + CSS + 
 | 2 | *"Haz que el diseño sea más minimalista y use tonos verdes, con un acento dorado en vez de naranja/terracota. El número total debe sentirse como una medición, no como una tarjeta genérica."* | Ajuste de paleta (`#1F4B3F` verde bosque, `#C79A3D` dorado), tipografía monoespaciada solo para las cifras de CO2, eliminación de sombras y bordes redondeados. |
 | 3 | *"Agrega ejemplos rápidos (chips) que el usuario pueda pulsar para probar la app sin escribir, y una comparación amigable del total (ej. en árboles) para que el número tenga contexto."* | Se añadieron chips de ejemplo y el cálculo de equivalencia en árboles absorbidos por año. |
 
-**[ ]** *Aquí van tus capturas de pantalla reales del proceso de iteración en Cursor/Replit (antes/después de cada prompt).*
+**Capturas recreadas del flujo actual:**
+
+**Pantalla inicial: layout y estado vacío**
+  ![](assets/antes_del_prompt.jpg)
+
+**Ejemplo rápido de funcionamiento**
+  ![](assets/funcionamiento.jpg)
+  
 
 ---
 
@@ -92,13 +101,14 @@ Esto resuelve el problema real del enunciado: el negocio no llena un formulario 
 
 Esto ilustra el patrón real de debugging en vibe coding: describir el síntoma observado (no la solución) y dejar que la IA proponga el mecanismo, mientras el desarrollador dirige *qué* problema resolver y valida el resultado.
 
-**[ ]** *Aquí va tu propia captura del error en consola y del prompt de corrección, si replicas el flujo en tu entorno.*
+**Problema 1:** al probar el archivo local, la consola mostró `API respondió 401` y la interfaz no se presentaba.
+
+  ![Página con error HTTP 401](assets/api400.jpg)
+
 
 **Segundo desafío (encontrado al desplegar):** al subir el archivo a GitHub Pages, la aplicación cargaba pero la funcionalidad de IA fallaba silenciosamente. La causa: la llamada a la API de Claude usada durante el desarrollo funciona sin configuración adicional *dentro* del entorno de artifacts de Claude.ai (la petición va autenticada automáticamente), pero al ejecutarse en un hosting estático externo, el navegador hace esa misma petición sin credenciales y la API la rechaza.
 
 **Solución dirigida por IA, sin backend propio:** en vez de montar un servidor solo para ocultar una API key, se le pidió a la IA generadora de código un motor de respaldo basado en reglas (extracción por expresiones regulares + tabla de factores de emisión) que se activa automáticamente si la llamada a la nube falla. El enunciado permite explícitamente que la funcionalidad de IA sea "simulada o real", así que este *fallback* no es un parche cosmético sino una decisión de arquitectura válida: la versión demostrada en vivo dentro de Claude usa IA real; la versión desplegada de forma independiente usa el motor simulado equivalente, sin que el usuario final note discontinuidad.
-
-**[ ]** *Aquí va tu captura del error de red/CORS en la consola del navegador al probar el sitio desplegado, y la comparación antes/después con el motor local activo.*
 
 ---
 
