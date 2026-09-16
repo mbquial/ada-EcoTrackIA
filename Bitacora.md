@@ -4,7 +4,7 @@
 
 **Proyecto:** MVP de cálculo de huella de carbono para pequeños negocios
 
-**Herramientas usadas:** Cursor
+**Herramientas usadas:** Bolt
 
 ---
 
@@ -24,7 +24,7 @@
 
 ## 2. Master Prompt
 
-Este fue el prompt inicial usado para dirigir a la herramienta de generación de código (Cursor) hacia la visión completa del producto:
+Este fue el prompt inicial usado para dirigir a la herramienta de generación de código (Bolt) hacia la visión completa del producto:
 
 ```
 Actúa como un desarrollador frontend senior especializado en productos de sostenibilidad.
@@ -101,9 +101,11 @@ Esto resuelve el problema real del enunciado: el negocio no llena un formulario 
 
 Esto ilustra el patrón real de debugging en vibe coding: describir el síntoma observado (no la solución) y dejar que la IA proponga el mecanismo, mientras el desarrollador dirige *qué* problema resolver y valida el resultado.
 
-**Problema 1:** al probar el archivo local, la consola mostró `API respondió 401` y la interfaz no se presentaba.
+**Problema 1:** al probar el archivo local, la llamada `fetch()` a la API respondió `401` por falta de credenciales. La página no se navegó fuera de EcoTrack: el error quedó registrado en la consola y el `catch` activó el motor local de respaldo.
 
-  ![Página con error HTTP 401](assets/api400.jpg)
+  ![Fallback local funcionando después del error 401](assets/api401.jpg)
+
+  ![Fallback local funcionando después del error 401](assets/api401_2.jpg)
 
 
 **Segundo desafío (encontrado al desplegar):** al subir el archivo a GitHub Pages, la aplicación cargaba pero la funcionalidad de IA fallaba silenciosamente. La causa: la llamada a la API de Claude usada durante el desarrollo funciona sin configuración adicional *dentro* del entorno de artifacts de Claude.ai (la petición va autenticada automáticamente), pero al ejecutarse en un hosting estático externo, el navegador hace esa misma petición sin credenciales y la API la rechaza.
