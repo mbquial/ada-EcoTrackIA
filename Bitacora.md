@@ -123,3 +123,8 @@ Con vibe coding, el rol cambió de "escribir cada línea" a **dirigir y validar*
 La ganancia principal no fue solo velocidad, sino que permitió mantener el foco en el problema del usuario (un dueño de negocio sin tiempo para formularios) en lugar de en la sintaxis, delegando la implementación mientras el criterio de diseño y producto seguía siendo humano.
 
 ---
+
+## 7. Enlace Proyecto Vivo
+
+En el siguiente enlace, se encuentra el proyecto:
+- https://mbquial.github.io/ada-EcoTrackIA/
