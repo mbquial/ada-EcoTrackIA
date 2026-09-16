@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoTrack AI — Registro de huella de carbono</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F3EC;
+    --panel:#FFFFFF;
+    --ink:#182A20;
+    --ink-soft:#4B5B4F;
+    --forest:#1F4B3F;
+    --forest-dark:#153A30;
+    --moss:#6B8F71;
+    --gold:#C79A3D;
+    --line:#DCE2D4;
+    --brick:#A8462F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  .wrap{max-width:1040px; margin:0 auto; padding:48px 24px 80px;}
+  header{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    gap:24px; border-bottom:1px solid var(--line); padding-bottom:28px;
+    margin-bottom:40px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-name{font-family:'Fraunces', serif; font-size:26px; font-weight:600; letter-spacing:-0.01em; color:var(--forest-dark);}
+  .tagline{max-width:320px; font-size:14px; color:var(--ink-soft); text-align:right;}
+  .hero{display:grid; grid-template-columns:1.1fr 0.9fr; gap:32px; margin-bottom:44px;}
+  @media (max-width:780px){
+    .hero{grid-template-columns:1fr;}
+    .tagline{text-align:left; max-width:none;}
+    header{align-items:flex-start;}
+  }
+  .hero h1{font-family:'Fraunces', serif; font-weight:500; font-size:clamp(28px,4vw,40px); line-height:1.15; margin:0 0 16px; color:var(--forest-dark); max-width:20ch;}
+  .hero p{color:var(--ink-soft); font-size:16px; max-width:52ch; margin:0;}
+  .total-card{background:var(--forest); color:#F1F3EC; padding:28px 30px; display:flex; flex-direction:column; justify-content:center; gap:6px;}
+  .total-card .label{font-size:13px; color:#BFD3C6;}
+  .total-card .value{font-family:'IBM Plex Mono', monospace; font-size:clamp(36px,5vw,48px); font-weight:500; letter-spacing:-0.01em;}
+  .total-card .value span{font-size:0.4em; margin-left:6px; color:#BFD3C6;}
+  .total-card .compare{font-size:13px; color:#DDE9DE; border-top:1px solid rgba(255,255,255,0.15); padding-top:10px; margin-top:8px;}
+  main{display:grid; grid-template-columns:0.85fr 1.15fr; gap:32px; align-items:start;}
+  @media (max-width:780px){main{grid-template-columns:1fr;}}
+  .panel{background:var(--panel); border:1px solid var(--line);}
+  .panel-head{padding:18px 22px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;}
+  .panel-head h2{font-family:'Fraunces', serif; font-weight:500; font-size:17px; margin:0; color:var(--forest-dark);}
+  .panel-body{padding:22px;}
+  textarea{width:100%; min-height:120px; resize:vertical; border:1px solid var(--line); padding:14px; font-family:'Work Sans', sans-serif; font-size:15px; color:var(--ink); background:#FBFBF8;}
+  textarea:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 0;}
+  .chip{font-size:12.5px; color:var(--forest-dark); background:#E7EDE3; border:none; padding:6px 11px; cursor:pointer; text-align:left;}
+  .chip:hover{background:#D9E3D3;}
+  .submit-row{margin-top:16px; display:flex; align-items:center; gap:14px;}
+  button.primary{background:var(--forest); color:#fff; border:none; padding:11px 22px; font-size:14.5px; font-weight:500; cursor:pointer; font-family:'Work Sans', sans-serif;}
+  button.primary:hover{background:var(--forest-dark);}
+  button.primary:disabled{background:#9CB0A2; cursor:default;}
+  .status{font-size:13px; color:var(--ink-soft);}
+  .status.err{color:var(--brick);}
+  .status.local{color:var(--moss);}
+  .ledger-empty{color:var(--ink-soft); font-size:14px; padding:6px 0;}
+  .entry{border-top:1px solid var(--line); padding:16px 0; display:flex; justify-content:space-between; gap:16px; animation:fade-in 0.4s ease;}
+  .entry:first-child{border-top:none; padding-top:2px;}
+  @keyframes fade-in{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+  @media (prefers-reduced-motion:reduce){.entry{animation:none;}}
+  .entry-main{flex:1;}
+  .entry-desc{font-size:14.5px; color:var(--ink); margin-bottom:3px;}
+  .entry-cat{font-size:12px; color:var(--moss);}
+  .entry-value{font-family:'IBM Plex Mono', monospace; font-size:15px; color:var(--forest-dark); white-space:nowrap; text-align:right;}
+  .entry-value span{display:block; font-size:10.5px; color:var(--ink-soft); font-family:'Work Sans', sans-serif;}
+  .tip{margin-top:18px; padding:14px 16px; background:#F6F1E4; border-left:3px solid var(--gold); font-size:13.5px; color:var(--forest-dark);}
+  .engine-note{font-size:11.5px; color:var(--ink-soft); margin-top:14px; border-top:1px solid var(--line); padding-top:10px;}
+  footer{margin-top:48px; padding-top:20px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-soft); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <path d="M15 3C9 3 4 8 4 15c0 7 5 12 11 12s11-5 11-12c0-3-1-6-3-8" stroke="#1F4B3F" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M15 27V13c0-4 3-7 7-7" stroke="#C79A3D" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">EcoTrack AI</span>
+    </div>
+    <p class="tagline">Cuéntanos qué hizo tu negocio hoy. Nosotros calculamos la huella de carbono.</p>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>Sin formularios. Solo cuéntalo como se lo dirías a un colega.</h1>
+      <p>Describe tus actividades del día en una frase — reparto, consumo eléctrico, insumos — y EcoTrack AI extrae los datos y estima el impacto en CO₂e al instante.</p>
+    </div>
+    <div class="total-card">
+      <div class="label">Huella acumulada de la sesión</div>
+      <div class="value" id="totalValue">0<span>kg CO₂e</span></div>
+      <div class="compare" id="totalCompare">Registra tu primera actividad para ver el equivalente.</div>
+    </div>
+  </section>
+
+  <main>
+    <div class="panel">
+      <div class="panel-head"><h2>Cuéntanos tu día</h2></div>
+      <div class="panel-body">
+        <textarea id="inputText" placeholder="Ej: Hoy usamos 5 camionetas de reparto en la ciudad y gastamos 200 kWh de luz en la bodega."></textarea>
+        <div class="chips">
+          <button class="chip" data-text="Hoy usamos 5 camionetas de reparto y gastamos 200 kWh de luz en la bodega">🚚 5 camionetas + 200 kWh</button>
+          <button class="chip" data-text="Recibimos un pedido de insumos que llegó en camión desde Medellín, y el equipo usó unas 40 resmas de papel esta semana">📦 Insumos + papel</button>
+          <button class="chip" data-text="La cafetería consumió 30 kg de café, usamos gas para la cocina todo el día y llegaron 15 clientes en carro">☕ Cafetería + gas</button>
+        </div>
+        <div class="submit-row">
+          <button class="primary" id="submitBtn">Registrar y calcular</button>
+          <span class="status" id="statusText"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Bitácora de hoy</h2></div>
+      <div class="panel-body">
+        <div id="ledger">
+          <p class="ledger-empty">Aún no hay actividades registradas.</p>
+        </div>
+        <div class="tip" id="tipBox" style="display:none;"></div>
+        <div class="engine-note" id="engineNote"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span>MVP construido con Vibe Coding — prototipo de EcoTrack AI.</span>
+    <span>Estimaciones aproximadas para fines de demostración.</span>
+  </footer>
+
+</div>
+
+<script>
+const textarea = document.getElementById('inputText');
+const submitBtn = document.getElementById('submitBtn');
+const statusText = document.getElementById('statusText');
+const ledger = document.getElementById('ledger');
+const totalValue = document.getElementById('totalValue');
+const totalCompare = document.getElementById('totalCompare');
+const tipBox = document.getElementById('tipBox');
+const engineNote = document.getElementById('engineNote');
+
+let runningTotal = 0;
+let entryCount = 0;
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    textarea.value = chip.dataset.text;
+    textarea.focus();
+  });
+});
+
+function extractJson(raw) {
+  const cleaned = raw.replace(/```json|```/g, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1) {
+      return JSON.parse(cleaned.slice(start, end + 1));
+    }
+    throw e;
+  }
+}
+
+// Intento 1: IA real vía API de Claude. Solo tiene éxito cuando la página
+// corre dentro del entorno de artifacts de Claude, que autentica la
+// petición automáticamente. En un hosting estático (GitHub Pages, Vercel
+// sin backend propio) esta llamada fallará por falta de credenciales, y
+// por diseño el código cae al motor local de abajo.
+async function analyzeWithCloudAI(text) {
+  const systemPrompt = `Eres el motor de análisis de EcoTrack AI, una herramienta para pequeños negocios en Colombia.
+Recibes una descripción libre de las actividades de un día de trabajo y debes:
+1. Identificar cada actividad relevante para la huella de carbono (transporte, electricidad, gas, insumos, residuos, etc.)
+2. Estimar un valor razonable de kg de CO2e para cada una, usando factores de emisión aproximados de sentido común. Son estimaciones para un MVP, no cifras certificadas.
+3. Responder ÚNICAMENTE con un objeto JSON, sin texto adicional, con esta forma exacta:
+{"activities":[{"description":"texto corto en español","category":"transporte|energia|insumos|residuos|otro","co2_kg":numero}],"total_co2_kg":numero,"tip":"una recomendación breve y accionable en español"}
+Si el texto no menciona nada relevante, responde con activities vacío y total_co2_kg en 0.`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: text }]
+    })
+  });
+  if (!response.ok) throw new Error("API respondió " + response.status);
+  const data = await response.json();
+  const textBlock = data.content.find(b => b.type === "text");
+  if (!textBlock) throw new Error("Respuesta sin texto analizable");
+  return extractJson(textBlock.text);
+}
+
+// Intento 2 (respaldo): motor local basado en reglas — sin llamadas de
+// red, funciona en cualquier hosting. Cumple el requisito del enunciado
+// de que la funcionalidad de IA "puede ser simulada".
+const FACTORS = {
+  camioneta: 9, camionetas: 9,
+  camion: 12, camiones: 12,
+  carro: 4, carros: 4, auto: 4, autos: 4,
+  moto: 1.5, motos: 1.5,
+  kwh: 0.18,
+  resma: 2.5, resmas: 2.5,
+  gas_fijo: 4.5,
+  producto: { café: 15, cafe: 15, carne: 27, papel: 1.3, plastico: 6, "plástico": 6 }
+};
+
+function analyzeLocally(text) {
+  const t = text.toLowerCase();
+  const activities = [];
+  let total = 0;
+
+  const vehicleRe = /(\d+)?\s*(camionetas?|camiones|carros?|autos?|motos?)\b/g;
+  let m;
+  while ((m = vehicleRe.exec(t)) !== null) {
+    const count = m[1] ? parseInt(m[1]) : 1;
+    const noun = m[2].replace(/s$/, '');
+    const factor = FACTORS[noun] ?? FACTORS[m[2]] ?? 5;
+    const co2 = count * factor;
+    activities.push({ description: `${count} ${m[2]} (transporte)`, category: 'transporte', co2_kg: co2 });
+    total += co2;
+  }
+
+  const kwhRe = /(\d+(?:[.,]\d+)?)\s*kwh/g;
+  while ((m = kwhRe.exec(t)) !== null) {
+    const qty = parseFloat(m[1].replace(',', '.'));
+    const co2 = qty * FACTORS.kwh;
+    activities.push({ description: `${qty} kWh de electricidad`, category: 'energia', co2_kg: co2 });
+    total += co2;
+  }
+
+  const resmaRe = /(\d+)\s*resmas?/g;
+  while ((m = resmaRe.exec(t)) !== null) {
+    const qty = parseInt(m[1]);
+    const co2 = qty * FACTORS.resma;
+    activities.push({ description: `${qty} resmas de papel`, category: 'insumos', co2_kg: co2 });
+    total += co2;
+  }
+
+  const kgProductRe = /(\d+)\s*kg\s+de\s+([a-záéíóúñ]+)/g;
+  while ((m = kgProductRe.exec(t)) !== null) {
+    const qty = parseInt(m[1]);
+    const product = m[2];
+    const factor = FACTORS.producto[product] ?? 2;
+    const co2 = qty * factor;
+    activities.push({ description: `${qty} kg de ${product}`, category: 'insumos', co2_kg: co2 });
+    total += co2;
+  }
+
+  const clientCarRe = /(\d+)\s*(?:personas|clientes)[^.]{0,20}(?:carro|auto|carros|autos)/g;
+  while ((m = clientCarRe.exec(t)) !== null) {
+    const qty = parseInt(m[1]);
+    const co2 = qty * 4;
+    activities.push({ description: `${qty} clientes llegaron en carro`, category: 'transporte', co2_kg: co2 });
+    total += co2;
+  }
+
+  if (/\bgas\b/.test(t)) {
+    activities.push({ description: 'Uso de gas para cocina/operación (estimado)', category: 'energia', co2_kg: FACTORS.gas_fijo });
+    total += FACTORS.gas_fijo;
+  }
+
+  let tip = 'Registra tus actividades a diario para identificar patrones y oportunidades de reducción.';
+  if (activities.some(a => a.category === 'transporte')) {
+    tip = 'Optimizar rutas de reparto o consolidar viajes puede reducir significativamente esta categoría.';
+  } else if (activities.some(a => a.category === 'energia')) {
+    tip = 'Revisar horarios de mayor consumo eléctrico puede ayudar a reducir el gasto energético.';
+  }
+
+  return { activities, total_co2_kg: total, tip };
+}
+
+async function analyze(text) {
+  try {
+    return { result: await analyzeWithCloudAI(text), engine: 'cloud' };
+  } catch (e) {
+    console.warn('IA en la nube no disponible, usando motor local:', e.message);
+    return { result: analyzeLocally(text), engine: 'local' };
+  }
+}
+
+function categoryLabel(cat) {
+  const map = { transporte: 'Transporte', energia: 'Energía', insumos: 'Insumos', residuos: 'Residuos', otro: 'Otro' };
+  return map[cat] || 'Otro';
+}
+
+function renderEntries(result) {
+  if (entryCount === 0) ledger.innerHTML = '';
+  if (!result.activities || result.activities.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'ledger-empty';
+    empty.textContent = 'No se detectaron actividades con impacto claro en ese texto — intenta ser más específico.';
+    ledger.prepend(empty);
+    return;
+  }
+  result.activities.forEach(act => {
+    entryCount++;
+    const row = document.createElement('div');
+    row.className = 'entry';
+    row.innerHTML = `
+      <div class="entry-main">
+        <div class="entry-desc">${act.description}</div>
+        <div class="entry-cat">${categoryLabel(act.category)}</div>
+      </div>
+      <div class="entry-value">${act.co2_kg.toFixed(1)}<span>kg CO₂e</span></div>
+    `;
+    ledger.prepend(row);
+    runningTotal += Number(act.co2_kg) || 0;
+  });
+  totalValue.innerHTML = runningTotal.toFixed(1) + '<span>kg CO₂e</span>';
+  const trees = (runningTotal / 21).toFixed(1);
+  totalCompare.textContent = `Equivalente aproximado a lo que absorben ${trees} árboles en un año.`;
+  if (result.tip) {
+    tipBox.style.display = 'block';
+    tipBox.textContent = '💡 ' + result.tip;
+  }
+}
+
+async function handleSubmit() {
+  const text = textarea.value.trim();
+  if (!text) {
+    statusText.className = 'status err';
+    statusText.textContent = 'Escribe una descripción antes de registrar.';
+    return;
+  }
+  submitBtn.disabled = true;
+  statusText.className = 'status';
+  statusText.textContent = 'Analizando...';
+
+  try {
+    const { result, engine } = await analyze(text);
+    renderEntries(result);
+    statusText.textContent = 'Registrado.';
+    engineNote.textContent = engine === 'cloud'
+      ? 'Analizado con IA en la nube (Claude).'
+      : 'Analizado con el motor local (sin conexión a la API en este despliegue).';
+    textarea.value = '';
+  } catch (err) {
+    console.error(err);
+    statusText.className = 'status err';
+    statusText.textContent = 'No se pudo analizar el texto. Intenta de nuevo.';
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+submitBtn.addEventListener('click', handleSubmit);
+</script>
+</body>
+</html>
